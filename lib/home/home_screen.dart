@@ -13,26 +13,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Book> _books = [];
+
   @override
   void initState() {
     super.initState();
     getLastBooks();
   }
 
-  void getLastBooks() async{
+  void getLastBooks() async {
     var lastBooks = await BooksService().getLastBooks();
     setState(() {
       _books = lastBooks;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     var showProgress = _books.isEmpty;
-    var listlengt = showProgress ? 3 : _books.length + 2;
+    var listLength = showProgress ? 3 : _books.length + 2;
     return Container(
       margin: const EdgeInsets.all(16),
       child: ListView.builder(
-        itemCount: listlengt,
+        itemCount: listLength,
         itemBuilder: (context, index) {
           if (index == 0) {
             return const HeaderWidget();
@@ -40,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (index == 1) {
             return const ListItemHeader();
           }
-          if(showProgress){
+          if (showProgress) {
             return const Padding(
               padding: EdgeInsets.only(top: 20),
               child: Center(child: CircularProgressIndicator()),
@@ -59,8 +61,9 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Image.asset('assets/images/Header.jpg'));
+      borderRadius: BorderRadius.circular(10),
+      child: Image.asset('assets/images/Header.jpg'),
+    );
   }
 }
 
@@ -72,7 +75,7 @@ class ListItemHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(top: 20, bottom: 10, left: 5),
       child: const Text(
-        "Ultimos Libros",
+        "Últimos Libros",
         style: TextStyle(fontSize: 20),
       ),
     );
@@ -100,27 +103,37 @@ class ListItemBook extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: Image.asset(_book.coverUrl),
+                  child: Image.network(
+                    _book.coverUrl,
+                    width: 120,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.error,
+                      size: 120,
+                    ),
+                  ),
                 ),
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _book.tittle,
+                        _book.name,
                         style: Theme.of(context)
                             .textTheme
                             .titleLarge!
                             .copyWith(fontSize: 16),
                         maxLines: 2,
-                        overflow: TextOverflow.ellipsis,),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: 5),
-                      Text(_book.author,
-                          style: Theme.of(context).textTheme.titleSmall),
-                      const SizedBox(height: 20),
                       Text(
-                        _book.description,
-                        maxLines: 4,
+                        _book.author,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        _book.summary,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
@@ -135,7 +148,7 @@ class ListItemBook extends StatelessWidget {
     );
   }
 
-  void _openBookDetail( Book book, BuildContext context) {
+  void _openBookDetail(Book book, BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
